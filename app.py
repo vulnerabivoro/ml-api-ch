@@ -17,3 +17,8 @@ def add_yara_rule():
     
     # Retornar la respuesta
     return jsonify({'message': 'Regla YARA agregada correctamente'}), 201
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
