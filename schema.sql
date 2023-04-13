@@ -1,0 +1,5 @@
+CREATE TABLE yara_rules (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    rule TEXT NOT NULL
+);
