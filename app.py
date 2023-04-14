@@ -29,6 +29,45 @@ def add_yara_rule():
     # Retornar la respuesta
     return jsonify({'message': 'Regla YARA agregada correctamente'}), 201
 
+
+@app.route('/api/analyze/text', methods=['POST'])
+def text_analyzer():
+    text = request.json['text']
+    rule_ids = request.json['rules']
+
+    # Obtener las reglas YARA almacenadas en la base de datos
+    rules = []
+    for rule_id in rule_ids:
+        rule = find_by_id(rule_id['rule_id'])
+        if rule:
+            rules.append(rule)
+
+    # Ejecutar las reglas YARA contra el texto
+    results = []
+    for rule in rules:
+        matched = False
+        compiled_rule = yara.compile(source=rule['yara_rule'])
+        matched = bool(compiled_rule.match(data=text))
+        results.append({'rule_id': rule['rule_id'],'matched':matched})
+
+    return jsonify({'message': rules,'status': "ok",'results': results}), 201
+
+def find_by_id(rule_id):
+    # Conexión a la base de datos SQLite
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+
+    # Consulta SQL para buscar la regla por su identificador
+    query = 'SELECT name, rule FROM yara_rules WHERE id = ?'
+    result = cursor.execute(query, (rule_id,)).fetchone()
+
+    if result:
+        name, rule = result
+        return ({'rule_id': rule_id, 'yara_rule': rule})
+
+    # Cerrar la conexión a la base de datos
+    conn.close()
+
 if __name__ == '__main__':
     app.run(debug=True)
 
