@@ -1,4 +1,4 @@
-import sqlite3
+import sqlite3, yara
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
@@ -13,11 +13,15 @@ def add_yara_rule():
     if not name or not rule:
         return jsonify({'error': 'Los datos del body son incorrectos'}), 400
 
+    # Validacion sintaxis YARA 
+    try:
+        yara.compile(source=rule)
+    except yara.SyntaxError as e:
+        return {'message': 'Sintaxis YARA invalida: {}'.format(str(e))}, 400
+
+    # DB save
     conn = sqlite3.connect('database.db')
     cur = conn.cursor()
-    
-    # Agregar la regla YARA
-    # Código para agregar la regla YARA
     cur.execute('INSERT INTO yara_rules (name, rule) VALUES (?, ?)', (name, rule))
     conn.commit()
     cur.close()
