@@ -52,6 +52,32 @@ def text_analyzer():
 
     return jsonify({'message': rules,'status': "ok",'results': results}), 201
 
+
+@app.route('/api/analyze/file', methods=['POST'])
+def file_analyzer():
+    files = request.files['file']
+    rule_ids = request.form['rules'].split(",")
+
+    # leer el contenido del archivo
+    file_content = files.read()
+
+    # Obtener las reglas YARA almacenadas en la base de datos
+    rules = []
+    for rule_id in rule_ids:
+        rule = find_by_id(rule_id)
+        if rule:
+            rules.append(rule)
+
+    # Ejecutar las reglas YARA contra el texto
+    results = []
+    for rule in rules:
+        matched = False
+        compiled_rule = yara.compile(source=rule['yara_rule'])
+        matched = bool(compiled_rule.match(data=file_content))
+        results.append({'rule_id': rule['rule_id'],'matched':matched})
+
+    return jsonify({'message': rules,'status': "ok",'results': results}), 201
+
 def find_by_id(rule_id):
     # Conexión a la base de datos SQLite
     conn = sqlite3.connect('database.db')
