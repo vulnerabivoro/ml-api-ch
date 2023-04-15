@@ -42,6 +42,49 @@ def add_yara_rule():
     # Retornar la respuesta
     return jsonify({'message': 'Regla YARA agregada correctamente'}), 201
 
+@app.route('/api/rule/<int:rule_id>', methods=['GET'])
+def get_yara_rule(rule_id):
+    # Buscar la regla por ID
+    result = find_by_id(rule_id)
+    if result:
+        # Retornar la regla YARA
+        return jsonify(result)
+    else:
+        # Si no se encuentra la regla, devolver un error 404
+        return jsonify({'error': 'No se encontró la regla YARA'}), 404
+
+
+@app.route('/api/rule/<int:rule_id>', methods=['PUT'])
+def update_yara_rule(rule_id):
+    # Buscar la regla por ID
+    result = find_by_id(rule_id)
+    if not result:
+        return jsonify({'error': 'No se encontró la regla YARA'}), 404
+
+    # Obtener los nuevos datos del body
+    name = request.json.get('name', result['yara_rule'])
+    rule = request.json.get('rule', result['yara_rule'])
+
+    # Validar que los nuevos datos sean correctos
+    if not name or not rule:
+        return jsonify({'error': 'Los datos del body son incorrectos'}), 400
+
+    # Validacion sintaxis YARA
+    try:
+        yara.compile(source=rule)
+    except yara.SyntaxError as e:
+        return {'message': 'Sintaxis YARA invalida: |'+ rule +' | '+format(str(e))}, 400
+
+    # Actualizar los datos en la base de datos
+    conn = sqlite3.connect('database.db')
+    cur = conn.cursor()
+    cur.execute('UPDATE yara_rules SET name=?, rule=? WHERE id=?', (name, rule, rule_id))
+    conn.commit()
+    cur.close()
+
+    # Retornar la respuesta
+    return jsonify({'message': 'Regla YARA actualizada correctamente'}), 200
+
 
 @app.route('/api/analyze/text', methods=['POST'])
 @auth.login_required
