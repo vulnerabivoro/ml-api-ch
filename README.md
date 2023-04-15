@@ -14,11 +14,11 @@ Este es un ejemplo de una API Flask para analizar reglas YARA. Utiliza una base 
 
 1. Clonar el repositorio:
 
-2. Instalar las dependencias:
-TOBEDONE ----------------- pip install -r requirements.txt
+2. Construir la imagen:
+docker build -t ml-api-ch .
 
-3. Ejecutar la aplicación:
-TOBEDONE Docker --------------------------------
+3. Ejecutar el contenedor:
+sudo docker run -p 5000:5000 ml-api-ch
 
 La aplicación se ejecutará en `http://localhost:5000`.
 
