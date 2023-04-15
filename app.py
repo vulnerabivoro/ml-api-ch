@@ -17,7 +17,7 @@ def add_yara_rule():
     try:
         yara.compile(source=rule)
     except yara.SyntaxError as e:
-        return {'message': 'Sintaxis YARA invalida: {}'.format(str(e))}, 400
+        return {'message': 'Sintaxis YARA invalida: |'+ rule +' | '+format(str(e))}, 400
 
     # DB save
     conn = sqlite3.connect('database.db')

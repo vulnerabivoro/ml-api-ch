@@ -1,0 +1,6 @@
+
+Test Request:
+curl --request POST --url http://127.0.0.1:5000/api/analyze/text --header 'content-type: application/json' --data '{"text": "Tarjetas de crédito Mastercard 5390700823285988", "rules": [{"rule_id": 1},	{"rule_id": 2}, {"rule_id": 3}]}'
+
+Regexp:
+/([0-9][ -]*){13,16}/
