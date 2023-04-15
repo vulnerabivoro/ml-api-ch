@@ -10,10 +10,13 @@ RUN apt-get update && apt-get install -y gcc
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-COPY . /
+COPY ./app/app.py .
+COPY ./app/database.db .
 
-# Exponer puerto
 EXPOSE 5000
 
 # Iniciar aplicación
-CMD ["python", "app/app.py"]
+# Produccion 
+# CMD ["python", "app.py"]
+# Localhost
+CMD [ "python", "-m", "flask", "run", "--host=0.0.0.0"]
