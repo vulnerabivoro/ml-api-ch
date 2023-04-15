@@ -1,9 +1,22 @@
 import sqlite3, yara
 from flask import Flask, request, jsonify
+from flask_httpauth import HTTPBasicAuth
 
 app = Flask(__name__)
+auth = HTTPBasicAuth()
+
+# Función de verificación de credenciales
+@auth.verify_password
+def verify_password(username, password):
+    conn = sqlite3.connect('database.db')
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM users WHERE username=?", (username,))
+    user = cur.fetchone()
+    if user and user[2] == password:
+        return username    
 
 @app.route('/api/rule', methods=['POST'])
+@auth.login_required
 def add_yara_rule():
     # Obtener los datos del body
     name = request.json['name']
@@ -31,6 +44,7 @@ def add_yara_rule():
 
 
 @app.route('/api/analyze/text', methods=['POST'])
+@auth.login_required
 def text_analyzer():
     text = request.json['text']
     rule_ids = request.json['rules']
@@ -54,6 +68,7 @@ def text_analyzer():
 
 
 @app.route('/api/analyze/file', methods=['POST'])
+@auth.login_required
 def file_analyzer():
     files = request.files['file']
     rule_ids = request.form['rules'].split(",")
